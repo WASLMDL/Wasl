@@ -1,15 +1,173 @@
-<!doctype html>
-<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090b14"><title>WASL</title>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WASL | وصل</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#090b14;--card:#141b2b;--line:#29334a;--muted:#a2aec4;--p:#8b5cf6;--pink:#d946ef}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 80% 0,#39205e,transparent 42%),var(--bg);color:#f5f6ff;font-family:system-ui,-apple-system,Arial}main{max-width:1050px;margin:auto;padding:20px}header{display:flex;justify-content:space-between;align-items:center;padding:8px 0 28px}.brand{font-size:26px;font-weight:900}.btn,button{border:1px solid var(--line);background:#202a40;color:white;border-radius:12px;padding:11px 15px;cursor:pointer}.hero{text-align:center;padding:25px 0 35px}h1{font-size:clamp(36px,7vw,62px);line-height:1.1;margin:16px}.grad{background:linear-gradient(90deg,#c4b5fd,#f0abfc);color:transparent;background-clip:text}.muted{color:var(--muted);line-height:1.8}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}.field{margin:14px 0}.field label{display:block;margin-bottom:7px;font-size:13px}input,select{width:100%;padding:13px;background:#0b1220;color:white;border:1px solid var(--line);border-radius:12px}.primary{width:100%;border:0;background:linear-gradient(100deg,#7c3aed,#c026d3);font-weight:800;margin-top:12px;padding:15px}.chat{height:300px;border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column}.msgs{flex:1;overflow:auto}.bubble{padding:10px;background:#26314a;border-radius:12px;margin:7px 0;max-width:85%;width:max-content}.mine{margin-inline-start:auto;background:#713dc2}.note{font-size:11px;color:#9aa6bd;line-height:1.7}.vip{padding:13px;border:1px dashed #9b7bea;border-radius:13px;margin-top:14px}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px}.features div{padding:16px;background:#121a29;border:1px solid var(--line);border-radius:15px}@media(max-width:740px){.grid,.features{grid-template-columns:1fr}}
-</style></head><body><main>
-<header><div class="brand">✦ WASL</div><div><button id="lang">English</button> <button id="vip">✦ VIP</button></div></header>
-<section class="hero"><span class="muted" id="tag">تعارف عفوي • محادثات جديدة</span><h1 id="headline">كل محادثة جميلة<br><span class="grad">تبدأ بلحظة</span></h1><p class="muted" id="intro">تعرّف على أشخاص جدد وابدأ حديثاً جديداً. اختر اسمك ولغتك ثم انطلق.</p></section>
-<div class="grid"><section class="card"><h2 id="setup">ابدأ لقاءك الأول</h2><p class="muted" id="desc">اسم مستعار، محادثة عشوائية، وتجربة بسيطة.</p><div class="field"><label id="nicklabel">اسمك المستعار</label><input id="nick" maxlength="24" value="ضيف جديد"></div><div class="field"><label id="langlabel">لغة المحادثة</label><select id="chatlang"><option value="ar">العربية</option><option value="en">English</option></select></div><div class="vip"><b>✦ VIP</b><p class="muted" id="vipdesc">اختيار جنس الطرف الآخر وأولوية الانتظار — قيد التجهيز.</p></div><button class="primary" id="start">ابدأ محادثة عشوائية</button><p class="note" id="status">هذه نسخة أولية. لن يتم تحصيل أي مبالغ. لا تشارك بياناتك الشخصية.</p></section>
-<section class="card"><h2 id="chattitle">مساحة المحادثة</h2><p class="muted" id="connection">غير متصل</p><div class="chat"><div class="msgs" id="msgs"><p class="muted" id="empty">ستظهر رسائلك هنا بعد ربط حسابك ومطابقة شخص آخر.</p></div><div style="display:flex;gap:7px"><input id="message" placeholder="اكتب رسالة" disabled><button id="send" disabled>إرسال</button></div></div><div style="display:flex;gap:8px;margin-top:9px"><button id="call" disabled>☎ اتصال صوتي</button><button id="report" disabled>⚑ إبلاغ</button></div><p class="note">المكالمات والدفع غير مفعّلين بعد. لا تدخل بيانات بطاقة بنكية في هذه النسخة.</p></section></div>
-<div class="features"><div>💬 <b>محادثات</b><p class="muted">رسائل مباشرة بعد المطابقة.</p></div><div>🌍 <b>لغتان</b><p class="muted">العربية والإنجليزية.</p></div><div>🛡️ <b>السلامة</b><p class="muted">نستكمل الحظر والإبلاغ قبل التوسع.</p></div></div>
-<p class="note">© 2026 WASL — نسخة تجريبية قيد التطوير</p></main>
+*{box-sizing:border-box}
+body{margin:0;background:#090b14;color:#fff;font-family:Arial,sans-serif;min-height:100vh;display:grid;place-items:center;padding:20px}
+.card{width:100%;max-width:440px;background:#141b2b;border:1px solid #29334a;border-radius:22px;padding:28px;box-shadow:0 15px 50px #0006}
+.logo{text-align:center;font-size:38px;font-weight:bold;color:#8b5cf6;margin-bottom:8px}
+.sub{text-align:center;color:#a2aec4;margin-bottom:25px}
+h2{font-size:22px;text-align:center}
+label{display:block;margin:16px 0 8px;color:#cbd5e1}
+input,select{width:100%;padding:14px;border-radius:11px;border:1px solid #35415b;background:#0d1321;color:white;font-size:16px}
+button{width:100%;padding:15px;border:0;border-radius:12px;background:#8b5cf6;color:white;font-size:17px;font-weight:bold;margin-top:20px;cursor:pointer}
+button:disabled{opacity:.5}
+.note{color:#94a3b8;font-size:13px;line-height:1.7;text-align:center;margin-top:18px}
+#status{margin-top:15px;text-align:center;line-height:1.7;color:#fbbf24}
+#profile{display:none;text-align:center}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="logo">WASL</div>
+<div class="sub">مساحة تجمعنا • محادثات بلا حدود</div>
+
+<section id="entry">
+<h2>أهلاً بك في وصل 👋</h2>
+<p class="sub">اختر اسمك ورمزك وابدأ رحلتك</p>
+
+<label for="nickname">الاسم المستعار</label>
+<input id="nickname" maxlength="30" placeholder="اكتب الاسم الذي سيظهر للآخرين">
+
+<label for="loginName">رمز الدخول الذي تختاره</label>
+<input id="loginName" maxlength="24" placeholder="4 إلى 24 حرفًا أو رقمًا">
+
+<label for="language">لغة المحادثة</label>
+<select id="language">
+<option value="ar">العربية</option>
+<option value="en">English</option>
+</select>
+
+<button id="start">الدخول كزائر</button>
+<div id="status"></div>
+<div class="note">دخولك كزائر لا يحتاج إلى بريد إلكتروني. احفظ رمزك حتى نضيف لاحقًا إمكانية تحويل حسابك إلى حساب دائم.</div>
+</section>
+
+<section id="profile">
+<h2>أهلاً بك في WASL 🎉</h2>
+<p id="welcome"></p>
+<p class="note">تم تسجيل دخولك كزائر. الخطوة التالية هي تجهيز نظام المحادثات.</p>
+</section>
+</main>
+
 <script>
-let en=false;document.getElementById('lang').onclick=()=>{en=!en;document.documentElement.lang=en?'en':'ar';document.documentElement.dir=en?'ltr':'rtl';document.getElementById('lang').textContent=en?'العربية':'English';document.getElementById('tag').textContent=en?'Random connections • New conversations':'تعارف عفوي • محادثات جديدة';document.getElementById('headline').innerHTML=en?'A great conversation<br><span class="grad">starts with a moment</span>':'كل محادثة جميلة<br><span class="grad">تبدأ بلحظة</span>';document.getElementById('intro').textContent=en?'Meet new people and start a fresh conversation. Choose your nickname and language.':'تعرّف على أشخاص جدد وابدأ حديثاً جديداً. اختر اسمك ولغتك ثم انطلق.';document.getElementById('setup').textContent=en?'Start your first chat':'ابدأ لقاءك الأول';document.getElementById('desc').textContent=en?'Nickname, random chat, simple experience.':'اسم مستعار، محادثة عشوائية، وتجربة بسيطة.';document.getElementById('nicklabel').textContent=en?'Your nickname':'اسمك المستعار';document.getElementById('langlabel').textContent=en?'Chat language':'لغة المحادثة';document.getElementById('vipdesc').textContent=en?'Choose partner gender and get priority — coming soon.':'اختيار جنس الطرف الآخر وأولوية الانتظار — قيد التجهيز.';document.getElementById('start').textContent=en?'Start random chat':'ابدأ محادثة عشوائية';document.getElementById('status').textContent=en?'Preview only. No payments are collected. Do not share personal data.':'هذه نسخة أولية. لن يتم تحصيل أي مبالغ. لا تشارك بياناتك الشخصية.';document.getElementById('chattitle').textContent=en?'Chat space':'مساحة المحادثة';document.getElementById('empty').textContent=en?'Messages will appear after account and matching setup.':'ستظهر رسائلك هنا بعد ربط حسابك ومطابقة شخص آخر.';};
-document.getElementById('start').onclick=()=>alert('الواجهة جاهزة. يلزم إكمال ربط قاعدة البيانات واختبار المطابقة قبل استقبال المستخدمين.');document.getElementById('vip').onclick=()=>alert('اشتراك VIP والدفع قيد التجهيز ولن يتم تحصيل أي مبالغ.');document.getElementById('call').onclick=()=>alert('الاتصال الصوتي غير مفعّل بعد.');
-</script></body></html>
+const SUPABASE_URL = "https://xtmiviishvurkvqwgwuv.supabase.co";
+const SUPABASE_KEY = "sb_publishable_rkR1e6-p_Mv-WM1tAT6keg_WZUR8fCb";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const statusBox = document.getElementById("status");
+const startButton = document.getElementById("start");
+
+function showStatus(message, error=false){
+  statusBox.textContent = message;
+  statusBox.style.color = error ? "#fb7185" : "#fbbf24";
+}
+
+async function loadProfile(user){
+  const {data, error} = await db
+    .from("profiles")
+    .select("nickname, login_name")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if(error) throw error;
+
+  if(data){
+    document.getElementById("entry").style.display = "none";
+    document.getElementById("profile").style.display = "block";
+    document.getElementById("welcome").textContent =
+      "مرحباً " + data.nickname + " — رمزك: " + (data.login_name || "");
+  }
+}
+
+async function enterGuest(){
+  startButton.disabled = true;
+  showStatus("جاري تجهيز حسابك...");
+
+  try{
+    const nickname = document.getElementById("nickname").value.trim();
+    const loginName = document.getElementById("loginName").value.trim();
+    const language = document.getElementById("language").value;
+
+    if(nickname.length < 2){
+      throw new Error("اكتب اسمًا مستعارًا من حرفين على الأقل");
+    }
+
+    if(!/^[A-Za-z0-9_.]{4,24}$/.test(loginName)){
+      throw new Error("الرمز يجب أن يكون 4 إلى 24 حرفًا أو رقمًا أو نقطة أو شرطة سفلية");
+    }
+
+    let {data: sessionData, error: sessionError} =
+      await db.auth.getSession();
+
+    if(sessionError) throw sessionError;
+
+    let user = sessionData.session?.user;
+
+    if(!user){
+      const {data, error} = await db.auth.signInAnonymously();
+      if(error) throw error;
+      user = data.user;
+    }
+
+    const {data: existing, error: readError} = await db
+      .from("profiles")
+      .select("id")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    if(readError) throw readError;
+
+    if(existing){
+      throw new Error("لديك حساب زائر محفوظ بالفعل في هذا المتصفح");
+    }
+
+    const {error: insertError} = await db
+      .from("profiles")
+      .insert({
+        id: user.id,
+        nickname: nickname,
+        login_name: loginName,
+        language: language,
+        is_vip: false
+      });
+
+    if(insertError){
+      if(insertError.code === "23505"){
+        throw new Error("هذا الرمز مستخدم بالفعل، اختر رمزًا آخر");
+      }
+      throw insertError;
+    }
+
+    document.getElementById("entry").style.display = "none";
+    document.getElementById("profile").style.display = "block";
+    document.getElementById("welcome").textContent =
+      "مرحباً " + nickname + " — رمزك: " + loginName;
+
+  }catch(error){
+    showStatus(error.message || "حدث خطأ، حاول مرة أخرى", true);
+  }finally{
+    startButton.disabled = false;
+  }
+}
+
+startButton.addEventListener("click", enterGuest);
+
+(async function(){
+  const {data} = await db.auth.getSession();
+  if(data.session?.user){
+    try{
+      await loadProfile(data.session.user);
+    }catch(error){
+      showStatus("تعذر تحميل الحساب: " + error.message, true);
+    }
+  }
+})();
+</script>
+</body>
+</html>
