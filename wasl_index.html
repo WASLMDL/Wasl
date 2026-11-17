@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020"><title>WASL | وصل</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0b1020;--panel:#151d30;--line:#2b3854;--purple:#8056df;--muted:#aab5ca}
+*{box-sizing:border-box}body{margin:0;padding:20px 12px;background:radial-gradient(circle at top,#242044,#0b1020 55%);color:#f8f8ff;font-family:Arial,sans-serif;min-height:100vh}.wrap{max-width:650px;margin:auto}.top{display:flex;justify-content:flex-end}.brand{text-align:center;padding:20px}.brand b{font-size:46px;letter-spacing:3px;color:#a78bfa}.brand p,.muted{color:var(--muted);font-size:14px;line-height:1.7}.card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px;margin:12px 0}h2{margin:0 0 12px}label{display:block;margin:13px 0 7px;color:#d5d9e5}input,select{width:100%;background:#0d1425;border:1px solid #3a4968;color:white;border-radius:11px;padding:13px;font-size:16px}button{border:0;border-radius:11px;padding:13px 16px;background:var(--purple);color:white;font-weight:bold;font-size:15px;cursor:pointer}button:disabled{opacity:.5}.secondary{background:#34415b}.danger{background:#a53d56}.row{display:flex;gap:10px}.row>*{flex:1}#status,#lobbyStatus{color:#fbbf24;min-height:24px;margin-top:12px;font-size:14px;line-height:1.6}.hidden{display:none!important}#chat{display:none}#messages{height:340px;overflow:auto;background:#0b1222;border:1px solid var(--line);border-radius:12px;padding:12px;margin:14px 0}.msg{max-width:85%;padding:10px 13px;border-radius:13px;margin:8px 0;overflow-wrap:anywhere;line-height:1.5}.mine{background:#5639a0;margin-right:auto}.other{background:#2b3852;margin-left:auto}.compose{display:flex;gap:8px}.compose input{flex:1;min-width:0}.head{display:flex;align-items:center;justify-content:space-between;gap:10px}@media(max-width:480px){.row{flex-direction:column}.card{padding:17px}.brand b{font-size:40px}#messages{height:48vh}}
+</style></head>
+<body><main class="wrap">
+<div class="top"><button class="secondary" id="language">English</button></div>
+<header class="brand"><b>WASL</b><p id="tagline">مساحة تجمعنا • محادثات بلا حدود</p></header>
+<section class="card" id="entry">
+<h2 id="welcome">أهلاً بك في WASL 👋</h2><p class="muted" id="intro">اختر اسماً مستعاراً وابدأ المحادثة.</p>
+<label id="nicknameLabel" for="nickname">اسمك المستعار</label><input id="nickname" maxlength="24" placeholder="مثال: أحمد">
+<div class="row"><div><label id="genderLabel" for="gender">جنسك</label><select id="gender"><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+<div><label id="prefLabel" for="preference">أفضل التحدث مع</label><select id="preference"><option value="any">لا يهم</option><option value="male">ذكر</option><option value="female">أنثى</option></select></div></div>
+<button id="enter" style="width:100%;margin-top:18px">دخول كزائر</button><div id="status"></div>
+<p class="muted" id="safety">احترم الآخرين ولا تشارك معلوماتك الشخصية. يمكنك إنهاء المحادثة في أي وقت.</p>
+</section>
+<section class="card hidden" id="lobby"><div class="head"><h2 id="hello">مرحباً</h2><button class="secondary" id="exit">خروج</button></div>
+<p class="muted" id="lobbyText">اضغط للبحث عن شخص للمحادثة.</p><button id="find" style="width:100%">ابدأ البحث</button><button id="cancel" class="danger hidden" style="width:100%;margin-top:9px">إلغاء البحث</button><div id="lobbyStatus"></div></section>
+<section class="card" id="chat"><div class="head"><h2 id="chatTitle">أنت متصل الآن</h2><button class="secondary" id="next">التالي</button></div>
+<div id="messages" aria-live="polite"></div><form class="compose" id="sendForm"><input id="message" maxlength="2000" placeholder="اكتب رسالتك..." autocomplete="off"><button id="send" type="submit">إرسال</button></form>
+<p class="muted">لا تشارك بياناتك الشخصية مع الغرباء.</p><button class="danger" id="end" style="width:100%">إنهاء المحادثة</button></section>
+<footer class="muted" style="text-align:center;padding:18px">WASL • تواصل باحترام وأمان</footer>
+</main>
+<script>
+(()=>{
+const URL="https://xtmiviishvurkvqwgwuv.supabase.co";
+const KEY="sb_publishable_rkR1e6-p_Mv-WM1tAT6keg_WZUR8fCb";
+const db=window.supabase.createClient(URL,KEY);
+const $=id=>document.getElementById(id);
+let user=null,conversation=null,channel=null,timer=null,english=false,searching=false;
+const tr=(ar,en)=>english?en:ar;
+function say(s){$("status").textContent=s}function lobbySay(s){$("lobbyStatus").textContent=s}
+async function auth(){let {data:{session},error}=await db.auth.getSession();if(error)throw error;if(session?.user)return session.user;let r=await db.auth.signInAnonymously();if(r.error)throw r.error;return r.data.user}
+function stop(){if(timer){clearInterval(timer);timer=null}if(channel){db.removeChannel(channel);channel=null}}
+function addMessage(m){if(document.querySelector('[data-id="'+m.id+'"]'))return;let d=document.createElement("div");d.className="msg "+(m.sender_id===user.id?"mine":"other");d.dataset.id=m.id;d.textContent=m.content;$("messages").appendChild(d);$("messages").scrollTop=$("messages").scrollHeight}
+async function load(){let {data,error}=await db.from("messages").select("id,sender_id,content,created_at").eq("conversation_id",conversation).order("created_at",{ascending:true}).limit(100);if(error){lobbySay("تعذر تحميل الرسائل: "+error.message);return} $("messages").innerHTML="";(data||[]).forEach(addMessage)}
+function listen(){channel=db.channel("wasl-"+conversation).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"conversation_id=eq."+conversation},p=>addMessage(p.new)).subscribe()}
+async function matched(row){stop();conversation=row.conversation_id;$("entry").classList.add("hidden");$("lobby").classList.add("hidden");$("chat").style.display="block";$("chatTitle").textContent=tr("تم العثور على شخص","You are connected");await load();listen();searching=false}
+async function attempt(){let {data,error}=await db.rpc("wasl_find_match",{p_preferred_gender:$("preference").value,p_language:english?"en":"ar"});if(error)throw error;let r=Array.isArray(data)?data[0]:data;if(r&&r.matched&&r.conversation_id){await matched(r);return true}return false}
+async function find(){if(searching||!user)return;searching=true;$("find").disabled=true;$("cancel").classList.remove("hidden");lobbySay(tr("جاري البحث عن شخص...","Searching for someone..."));try{if(await attempt())return;lobbySay(tr("لم نجد شخصاً بعد. سنواصل البحث تلقائياً.","No match yet. We will keep searching."));timer=setInterval(async()=>{try{if(!searching||conversation)return;await attempt()}catch(e){stop();searching=false;$("find").disabled=false;lobbySay("تعذر البحث: "+e.message)}},3500)}catch(e){searching=false;$("find").disabled=false;$("cancel").classList.add("hidden");lobbySay("تعذر بدء المطابقة: "+e.message)}}
+async function removeQueue(){if(user)await db.from("matchmaking_queue").delete().eq("user_id",user.id)}
+async function endChat(){stop();searching=false;if(conversation)await db.from("conversations").update({status:"ended",ended_at:new Date().toISOString()}).eq("id",conversation);conversation=null;await removeQueue();$("chat").style.display="none";$("lobby").classList.remove("hidden");$("find").disabled=false;lobbySay(tr("انتهت المحادثة.","Chat ended."))}
+$("enter").onclick=async()=>{let nickname=$("nickname").value.trim();if(!nickname){say(tr("اكتب اسماً مستعاراً أولاً.","Please enter a nickname."));return}$("enter").disabled=true;try{user=await auth();let {error}=await db.from("profiles").upsert({id:user.id,nickname,login_name:nickname,gender:$("gender").value,language:english?"en":"ar",is_vip:false},{onConflict:"id"});if(error)throw error;$("entry").classList.add("hidden");$("lobby").classList.remove("hidden");$("hello").textContent=tr("مرحباً، ","Welcome, ")+nickname;lobbySay(tr("تم تسجيل دخولك كزائر.","Signed in as a guest."))}catch(e){say("تعذر الدخول أو حفظ الملف الشخصي: "+e.message);$("enter").disabled=false}};
+$("find").onclick=find;
+$("cancel").onclick=async()=>{stop();searching=false;await removeQueue();$("find").disabled=false;$("cancel").classList.add("hidden");lobbySay(tr("تم إلغاء البحث.","Search cancelled."))};
+$("sendForm").onsubmit=async e=>{e.preventDefault();let content=$("message").value.trim();if(!content||!conversation)return;$("send").disabled=true;let {error}=await db.from("messages").insert({conversation_id:conversation,sender_id:user.id,content});$("send").disabled=false;if(error){lobbySay("تعذر إرسال الرسالة: "+error.message);return}$("message").value=""};
+$("end").onclick=endChat;$("next").onclick=async()=>{await endChat();find()};
+$("exit").onclick=async()=>{stop();await removeQueue();await db.auth.signOut();user=null;$("lobby").classList.add("hidden");$("entry").classList.remove("hidden");$("enter").disabled=false;say("")};
+$("language").onclick=()=>{english=!english;document.documentElement.lang=english?"en":"ar";document.documentElement.dir=english?"ltr":"rtl";$("language").textContent=english?"العربية":"English";$("tagline").textContent=tr("مساحة تجمعنا • محادثات بلا حدود","A place to connect • Conversations without limits");$("welcome").textContent=tr("أهلاً بك في WASL 👋","Welcome to WASL 👋");$("intro").textContent=tr("اختر اسماً مستعاراً وابدأ المحادثة.","Choose a nickname and start chatting.");$("nicknameLabel").textContent=tr("اسمك المستعار","Your nickname");$("genderLabel").textContent=tr("جنسك","Your gender");$("prefLabel").textContent=tr("أفضل التحدث مع","I prefer to chat with");$("enter").textContent=tr("دخول كزائر","Enter as guest");$("find").textContent=tr("ابدأ البحث","Find a chat");$("cancel").textContent=tr("إلغاء البحث","Cancel search");$("next").textContent=tr("التالي","Next");$("end").textContent=tr("إنهاء المحادثة","End chat");$("send").textContent=tr("إرسال","Send");$("message").placeholder=tr("اكتب رسالتك...","Write a message...");$("lobbyText").textContent=tr("اضغط للبحث عن شخص للمحادثة.","Find someone to chat with.");$("safety").textContent=tr("احترم الآخرين ولا تشارك معلوماتك الشخصية. يمكنك إنهاء المحادثة في أي وقت.","Respect others and do not share personal information. You can end a chat anytime.")};
+window.addEventListener("beforeunload",stop);
+})();
+</script></body></html>
